@@ -1,9 +1,9 @@
 ---
-name: weekly-report
-description: Builds the user's weekly report of their Linear issues as a markdown list ready to post. Trigger on 'weekly report', 'weekly update', 'what did I do this week', 'last week's report', 'status update', 'summarize my Linear work'.
+name: weekly-recap
+description: Builds the user's weekly recap of their Linear issues as a markdown list ready to post. Trigger on 'weekly recap', 'weekly report', 'weekly update', 'what did I do this week', 'last week's report', 'status update', 'summarize my Linear work'.
 ---
 
-# Weekly report
+# Weekly recap
 
 Produce a markdown list of the user's Linear issues for one week, split into
 **To do**, **In progress**, **In review** and **Done**, in the exact format
