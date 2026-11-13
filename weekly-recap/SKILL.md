@@ -43,34 +43,3 @@ Show the report inside a ```markdown code block so the raw markdown is
 copyable, and also copy it to the clipboard with `pbcopy`. After the block, add
 one line per judgment call worth checking (for example, an issue that bounced
 back from Staging). If there were none, say nothing more.
-
-## Gotchas
-
-- **Linear's `statusType` is wrong for this flow.** `Staging` and
-  `Ready for Firebase` are "started" in Linear, but to the user the work is
-  finished — it's only waiting on QA or release. Classify by state name using
-  the table, never by `statusType`.
-- **Moving between Done-section states is not new work.** An issue that
-  reached `Staging` before the week and moved to `Staging Review` this week
-  shows up in the `updatedAt` query but doesn't count. Same for issues that only
-  got a comment or label edit — `updatedAt` bumps on any change, so it only
-  gives candidates, not the Done list.
-- **Bounce-backs count only on first arrival.** An issue that reached a
-  Done-section state before the week, went back to `In Progress` or
-  `Dev Review`, and returned to Done this week is left out. If it's still in
-  `In Progress` or `Dev Review` now, it goes in that section as usual.
-- **The week starts in Taipei, Linear timestamps are UTC.** Tuesday 00:00
-  Taipei is Monday 16:00 UTC, so something finished Monday evening UTC belongs
-  to this week.
-- **Don't filter by team.** The user works in both FRO and MOB; a team filter
-  silently drops half the report.
-- **`list_issues` paginates.** Keep paging while `hasNextPage` is true on every
-  call, or issues go missing without any error.
-- **Brackets in titles break the link.** Titles like `[BackOffice] …` must have
-  `[` and `]` escaped as `\[` and `\]`.
-- **Don't build the URL yourself.** Linear truncates the slug for long titles
-  (see FRO-627 in `format.md`, which ends at `…hover-and`). Use
-  the issue's `url` field.
-- **The shell eats the backslashes on the way to `pbcopy`.** Pass the report
-  through a quoted heredoc (`<<'EOF'`); otherwise the pasted brackets come out
-  unescaped and the links break.
