@@ -5,10 +5,6 @@ description: Builds the user's weekly recap of their Linear issues as a markdown
 
 # Weekly recap
 
-Produce a markdown list of the user's Linear issues for one week, split into
-**To do**, **In progress**, **In review** and **Done**, in the exact format
-they post.
-
 ## The week
 
 Default: Tuesday 00:00 Asia/Taipei up to now. If the user asks for "last week",
@@ -35,19 +31,13 @@ The user's teams (FRO and MOB) share this flow:
 - **Done** — the issue entered a Done-section state for the first time during
   the week, coming from `In Progress` or `Dev Review` (check `stateHistory`),
   and is still in one now.
-- Leave out Backlog, Triage, Canceled and Duplicate.
-
-If a team has a state not listed here, decide from its name which section it
-fits, and mention the call you made.
 
 ## Gathering issues
 
-Ask for fields `id`, `title`, `status`, `url`. Run the independent calls in
-parallel.
+Ask for fields `id`, `title`, `status`, `url`.
 
 1. `list_issues` with `assignee: "me"` and `state` set to each of `Todo`,
-   `In Progress` and `Dev Review` — one call per state. These fill the first
-   three sections directly.
+   `In Progress` and `Dev Review` — one call per state.
 2. `list_issues` with `assignee: "me"` and `updatedAt: <week start>`. Any
    issue whose status changed this week shows up here.
 3. For each issue from step 2 that is now in a Done-section state, call
@@ -81,7 +71,7 @@ back from Staging). If there were none, say nothing more.
   `In Progress` or `Dev Review` now, it goes in that section as usual.
 - **The week starts in Taipei, Linear timestamps are UTC.** Tuesday 00:00
   Taipei is Monday 16:00 UTC, so something finished Monday evening UTC belongs
-  to this week. Don't do the date math in your head.
+  to this week.
 - **Don't filter by team.** The user works in both FRO and MOB; a team filter
   silently drops half the report.
 - **`list_issues` paginates.** Keep paging while `hasNextPage` is true on every
