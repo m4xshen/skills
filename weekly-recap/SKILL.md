@@ -56,27 +56,8 @@ parallel.
 
 ## Output format
 
-Match this exactly — it is what the user pastes:
-
-```markdown
-* **To do**
-  * [FRO-700: \[BackOffice\] Example todo issue](https://linear.app/letsgoup-tw/issue/FRO-700/backoffice-example-todo-issue)
-* **In progress**
-  * [FRO-624: \[BackOffice\] General Export / Import UI across lists](https://linear.app/letsgoup-tw/issue/FRO-624/backoffice-general-export-import-ui-across-lists)
-* **In review**
-  * [MOB-610: \[Android\] Example issue in code review](https://linear.app/letsgoup-tw/issue/MOB-610/android-example-issue-in-code-review)
-* **Done**
-  * [MOB-604: \[Android\] Remove legacy color aliases from theme](https://linear.app/letsgoup-tw/issue/MOB-604/android-remove-legacy-color-aliases-from-theme)
-  * [FRO-627: \[BackOffice\] Bulk edit: pinned columns don't match the row's hover and selected colors](https://linear.app/letsgoup-tw/issue/FRO-627/backoffice-bulk-edit-pinned-columns-dont-match-the-rows-hover-and)
-```
-
-- Sections in this order: To do, In progress, In review, Done. Omit a section
-  that has no issues.
-- `*` bullets, two-space indent for issues.
-- Link text is `<ID>: <title>`, with the title exactly as in Linear, including
-  Chinese text.
-- Within Done, order issues by when they reached Done, oldest first. Order the
-  other sections by issue ID.
+Read [format.md](format.md) before writing the recap and match it exactly —
+it is what the user pastes.
 
 Show the report inside a ```markdown code block so the raw markdown is
 copyable, and also copy it to the clipboard with `pbcopy`. After the block, add
@@ -108,7 +89,8 @@ back from Staging). If there were none, say nothing more.
 - **Brackets in titles break the link.** Titles like `[BackOffice] …` must have
   `[` and `]` escaped as `\[` and `\]`.
 - **Don't build the URL yourself.** Linear truncates the slug for long titles
-  (see FRO-627 above, which ends at `…hover-and`). Use the issue's `url` field.
+  (see FRO-627 in `format.md`, which ends at `…hover-and`). Use
+  the issue's `url` field.
 - **The shell eats the backslashes on the way to `pbcopy`.** Pass the report
   through a quoted heredoc (`<<'EOF'`); otherwise the pasted brackets come out
   unescaped and the links break.
