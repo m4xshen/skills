@@ -9,11 +9,7 @@ description: Builds the user's weekly recap of their Linear issues as a markdown
 
 Default: Tuesday 00:00 Asia/Taipei up to now. If the user asks for "last week",
 use the previous Tuesday 00:00 to this Tuesday 00:00 (Taipei). Get the boundary
-from the shell:
-
-```bash
-TZ=Asia/Taipei date -v-tuesday +%Y-%m-%dT00:00:00%z   # this week's Tuesday (macOS date)
-```
+from the shell.
 
 ## What counts as which
 
@@ -34,15 +30,9 @@ The user's teams (FRO and MOB) share this flow:
 
 ## Gathering issues
 
-Ask for fields `id`, `title`, `status`, `url`.
-
-1. `list_issues` with `assignee: "me"` and `state` set to each of `Todo`,
-   `In Progress` and `Dev Review` — one call per state.
-2. `list_issues` with `assignee: "me"` and `updatedAt: <week start>`. Any
-   issue whose status changed this week shows up here.
-3. For each issue from step 2 that is now in a Done-section state, call
-   `get_issue` with fields `stateHistory` to find when it left `In Progress`
-   or `Dev Review` for a Done-section state.
+Find the user's issues that are in To do, In progress and In review now, and
+the ones that reached Done this week. For Done, `updatedAt` since the week start
+narrows the candidates; confirm each with `stateHistory`.
 
 ## Output format
 
@@ -63,8 +53,8 @@ back from Staging). If there were none, say nothing more.
 - **Moving between Done-section states is not new work.** An issue that
   reached `Staging` before the week and moved to `Staging Review` this week
   shows up in the `updatedAt` query but doesn't count. Same for issues that only
-  got a comment or label edit — `updatedAt` bumps on any change, so step 2 is a
-  candidate list, not the Done list.
+  got a comment or label edit — `updatedAt` bumps on any change, so it only
+  gives candidates, not the Done list.
 - **Bounce-backs count only on first arrival.** An issue that reached a
   Done-section state before the week, went back to `In Progress` or
   `Dev Review`, and returned to Done this week is left out. If it's still in
