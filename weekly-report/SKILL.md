@@ -1,6 +1,6 @@
 ---
 name: weekly-report
-description: Build the user's weekly work report from Linear — their to-do, in-progress, in-review, and finished issues for the week — as a ready-to-post markdown list. Use whenever the user asks for their weekly report, weekly update, "what did I do this week", a status update to post, or a summary of their Linear work for a week (including "last week's report").
+description: Builds the user's weekly report of their Linear issues as a markdown list ready to post. Trigger on 'weekly report', 'weekly update', 'what did I do this week', 'last week's report', 'status update', 'summarize my Linear work'.
 ---
 
 # Weekly report
@@ -13,14 +13,11 @@ they post.
 
 Default: Tuesday 00:00 Asia/Taipei up to now. If the user asks for "last week",
 use the previous Tuesday 00:00 to this Tuesday 00:00 (Taipei). Get the boundary
-from the shell rather than doing date math in your head:
+from the shell:
 
 ```bash
 TZ=Asia/Taipei date -v-tuesday +%Y-%m-%dT00:00:00%z   # this week's Tuesday (macOS date)
 ```
-
-Convert to UTC for comparing against Linear timestamps (Taipei is UTC+8, so
-Tuesday 00:00 Taipei is Monday 16:00 UTC).
 
 ## What counts as which
 
@@ -33,23 +30,11 @@ The user's teams (FRO and MOB) share this flow:
 | In review   | `Dev Review` (the PR is in code review)                                        |
 | Done        | `Staging`, `Ready for Firebase`, `Staging Review`, `Ready for Release`, `Done` |
 
-Linear marks `Staging` and `Ready for Firebase` as "started", but to the user an
-issue there is finished — the development work is done and it is waiting on QA
-or release. So don't use Linear's `statusType` to decide; use the state names
-above.
-
 - **To do**, **In progress**, **In review** — the issue is in that state now,
   in any cycle. These describe where things stand, not what changed this week.
-- **Done** — the issue entered a Done-section state during the week, coming
-  from `In Progress` or `Dev Review` (check `stateHistory`), and is still in
-  one now. Moving between Done-section states (Staging → Staging Review) is
-  not new work, so an issue that reached Staging before the week started
-  doesn't count even if it moved on this week.
-- An issue that first reached a Done-section state before the week, bounced
-  back to `In Progress` or `Dev Review`, and returned to a Done-section state
-  this week is left out. Only an issue's first arrival at a Done-section
-  state counts. If it is still in `In Progress` or `Dev Review` now, it goes
-  in that section as usual.
+- **Done** — the issue entered a Done-section state for the first time during
+  the week, coming from `In Progress` or `Dev Review` (check `stateHistory`),
+  and is still in one now.
 - Leave out Backlog, Triage, Canceled and Duplicate.
 
 If a team has a state not listed here, decide from its name which section it
@@ -57,9 +42,8 @@ fits, and mention the call you made.
 
 ## Gathering issues
 
-No team filter anywhere — the user works in both FRO and MOB. Page through
-every `list_issues` call while `hasNextPage` is true. Ask for fields `id`,
-`title`, `status`, `url`. Run the independent calls in parallel.
+Ask for fields `id`, `title`, `status`, `url`. Run the independent calls in
+parallel.
 
 1. `list_issues` with `assignee: "me"` and `state` set to each of `Todo`,
    `In Progress` and `Dev Review` — one call per state. These fill the first
@@ -89,15 +73,42 @@ Match this exactly — it is what the user pastes:
 - Sections in this order: To do, In progress, In review, Done. Omit a section
   that has no issues.
 - `*` bullets, two-space indent for issues.
-- Link text is `<ID>: <title>`, with `[` and `]` in the title escaped as `\[`
-  and `\]` so the link doesn't break. Keep the title exactly as in Linear,
-  including Chinese text.
-- Link to the issue's `url` from Linear; don't build it yourself.
+- Link text is `<ID>: <title>`, with the title exactly as in Linear, including
+  Chinese text.
 - Within Done, order issues by when they reached Done, oldest first. Order the
   other sections by issue ID.
 
 Show the report inside a ```markdown code block so the raw markdown is
-copyable, and also copy it to the clipboard with `pbcopy` (pass it via a
-quoted heredoc so backslashes survive). After the block, add one line per
-judgment call worth checking (for example, an issue that bounced back from
-Staging). If there were none, say nothing more.
+copyable, and also copy it to the clipboard with `pbcopy`. After the block, add
+one line per judgment call worth checking (for example, an issue that bounced
+back from Staging). If there were none, say nothing more.
+
+## Gotchas
+
+- **Linear's `statusType` is wrong for this flow.** `Staging` and
+  `Ready for Firebase` are "started" in Linear, but to the user the work is
+  finished — it's only waiting on QA or release. Classify by state name using
+  the table, never by `statusType`.
+- **Moving between Done-section states is not new work.** An issue that
+  reached `Staging` before the week and moved to `Staging Review` this week
+  shows up in the `updatedAt` query but doesn't count. Same for issues that only
+  got a comment or label edit — `updatedAt` bumps on any change, so step 2 is a
+  candidate list, not the Done list.
+- **Bounce-backs count only on first arrival.** An issue that reached a
+  Done-section state before the week, went back to `In Progress` or
+  `Dev Review`, and returned to Done this week is left out. If it's still in
+  `In Progress` or `Dev Review` now, it goes in that section as usual.
+- **The week starts in Taipei, Linear timestamps are UTC.** Tuesday 00:00
+  Taipei is Monday 16:00 UTC, so something finished Monday evening UTC belongs
+  to this week. Don't do the date math in your head.
+- **Don't filter by team.** The user works in both FRO and MOB; a team filter
+  silently drops half the report.
+- **`list_issues` paginates.** Keep paging while `hasNextPage` is true on every
+  call, or issues go missing without any error.
+- **Brackets in titles break the link.** Titles like `[BackOffice] …` must have
+  `[` and `]` escaped as `\[` and `\]`.
+- **Don't build the URL yourself.** Linear truncates the slug for long titles
+  (see FRO-627 above, which ends at `…hover-and`). Use the issue's `url` field.
+- **The shell eats the backslashes on the way to `pbcopy`.** Pass the report
+  through a quoted heredoc (`<<'EOF'`); otherwise the pasted brackets come out
+  unescaped and the links break.
